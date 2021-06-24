@@ -1,0 +1,10 @@
+corpo {
+    altura: 95 vh;
+    largura: 95 vw;
+    display: flex;
+    direção flexível: coluna;
+    justificar o conteúdo: centro;
+    alinhar-itens: centro;
+    cor de fundo: branco;
+    color # ( 52, 165, 52);
+}
