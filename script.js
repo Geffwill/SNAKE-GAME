@@ -10,86 +10,153 @@
  * - Author          : William
  * - Modification    : 
  **/
-deixe canvas = document.getElementById("cobra"); // criar elemento que irá rodar o jogo
-deixe context = canvas.getContext("2d"); // ....
-let box = 32;
-deixe cobra = []; // criar cobrinha como lista, já que ela vai ser uma série de coordenadas, que quando pintadas, criam os quadradinhos
-cobra[0] = {
-    x: 8 * caixa,
-    y: 8 * caixa
-}
-deixe direção = "certo";
-deixe comida = {
-    x: matemática.floor(Math.random() * 15 + 1) * box,
-    y: matemática.floor(Math.random() * 15 + 1) * box
+const canvas = document.getElementById("canvas")
+const canvasContext = canvas.getContext('2d')
+
+window.onload = () => {
+    gameLoop()
 }
 
-function criarBG() {
-    contexto.fillStyle = "verde claro ";
-    contexto.fillRect(0, 0, 16 * caixa, 16 * caixa); // desenha o retângulo usando xeyea largura e altura setadas
+function gameLoop() {
+    setInterval(show, 1000/20) 
 }
 
-function criarCobrinha() {
-    para(i = 0; i < cobra.comprimento; i++) {
-        contexto.fillStyle = "verde";
-        contexto.fillRect(cobra[i].x, cobra[i].y, caixa, caixa);
+function show() {
+    update()
+    draw()
+}
+
+function update() {
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+    snake.move()
+    eatApple()
+    checkHitWall()
+}
+
+function eatApple() {
+    if(snake.tail[snake.tail.length - 1].x == apple.x &&
+        snake.tail[snake.tail.length - 1].y == apple.y){
+            snake.tail[snake.tail.length] = {x:apple.x, y: apple.y}
+            apple = new Apple();
+        }
+}
+
+function checkHitWall() {
+    let headTail = snake.tail[snake.tail.length -1]
+
+    if (headTail.x == - snake.size) {
+        headTail.x = canvas.width - snake.size
+    } else if (headTail.x == canvas.widh) {
+        headTail.x = 0
+    } else if (headTail.y == - snake.size) {
+        headTail.y = canvas.height - snake.size
+    } else if (headTail.y == canvas.height) {
+        headTail.y = 0 
     }
 }
 
-function drawFood() {
-    contexto.fillStyle = "vermelho";
-    contexto.fillRect(comida.x, comida.y, caixa, caixa);
+function draw() {
+    createRect(0,0,canvas.width, canvas.height, "black")
+    createRect(0,0, canvas.width, canvas.height)
+
+    for (let i = 0; i < snake.tail.length; i++){
+        createRect(snake.tail[i].x + 2.5, snake.tail[i].y + 2.5,
+            snake.size - 5, snake.size- 5, "white")
+    }
+
+    canvasContext.font = "20px Arial"
+    canvasContext.fillStyle = "#00FF42"
+    canvasContext.fillText("Score: " + (snake.tail.length -1),canvas.width - 120, 18)
+    createRect(apple.x, apple.y, apple.size, apple.size, apple.color)
 }
 
-// quando um evento acontece, detecta e chama uma função
-documento.addEventListener('keydown', update);
-
-atualização de função(evento) {
-    if (event.keyCode == 37 && direction! = 'right') direction = 'left';
-    if (event.keyCode == 38 && direction! = 'down') direction = 'up';
-    if (event.keyCode == 39 && direction! = 'left') direction = 'right';
-    if (event.keyCode == 40 && direction! = 'up') direction = 'down';
+function createRect(x,y,width, height,color) {
+    canvasContext.fillStyle = color
+    canvasContext.fillRect(x, y, width, height)
 }
 
-function iniciarJogo() {
+window.addEventListener("keydown", (event) => {
+    setTimeout(() => {
+        if (event.keyCode == 37 && snake.rotateX != 1) {
+            snake.rotateX = -1
+            snake.rotateY = 0
+        } else if (event.keyCode == 38 && snake.rotateY != 1) {
+            snake.rotateX = 0
+            snake.rotateY = -1
+        } else if (event.keyCode == 39 && snake.rotateX != -1) {
+            snake.rotateX = 1
+            snake.rotateY = 0
+        } else if (event.keyCode == 40 && snake.rotateY != -1) {
+            snake.rotateX = 0
+            snake.rotateY = 1
+        }
+    }, 1)
+})
 
-    if (cobra[0].x > 15 * caixa && direção == "direita") cobra[0].x = 0;
-    if (cobra[0].x < 0 && direção == 'esquerda') cobra[0].x = 16 * caixa;
-    if (cobra[0].y > 15 * caixa && direção == "para baixo") cobra[0].y = 0;
-    if (cobra[0].y < 0 && direction == 'up') cobra[0].y = 16 * caixa;
+class Snake {
+    constructor(x, y, size) {
+        this.x = x
+        this.y = y
+        this.size = size
+        this.tail = [{x:this.x, y:this.y}]
+        this.rotateX = 0
+        this.rotateY = 1
+    }
 
-    para(i = 1; i < cobra.comprimento; i++) {
-        if (cobra[0].x == cobra[i].x && cobra[0].y == cobra[i].y) {
-            clearInterval(jogo);
-            alert('Game Over :(');
+    move() {
+        let newRect
+
+        if (this.rotateX == 1) {
+            newRect = {
+                x: this.tail[this.tail.length - 1].x + this.size,
+                y: this.tail[this.tail.length - 1].y
+            }
+        } else if (this.rotateX == -1) {
+            newRect = {
+                x: this.tail[this.tail.length - 1].x - this.size,
+                y: this.tail[this.tail.length - 1].y
+            }
+        } else if (this.rotateY == 1) {
+            newRect = {
+                x: this.tail[this.tail.length - 1].x,
+                y: this.tail[this.tail.length - 1].y + this.size
+            }
+        } else if (this.rotateY == -1) {
+            newRect = {
+                x: this.tail[this.tail.length - 1].x,
+                y: this.tail[this.tail.length - 1].y - this.size
+            }
+        }
+
+        this.tail.shift()
+        this.tail.push(newRect)
+    }
+}
+
+class Apple{
+    constructor(){
+        let isTouching
+        
+        while (true) {
+            isTouching = false;
+            this.x = Math.floor(Math.random() * canvas.width / snake.size) * snake.size
+            this.y = Math.floor(Math.random() * canvas.height / snake.size) * snake.size
+            
+            for (let i = 0; i < snake.tail.length; i++) {
+                if (this.x == snake.tail[i].x && this.y == snake.tail[i].y) {
+                    isTouching = true
+                }
+            }
+
+            this.size = snake.size
+            this.color = "red"
+
+            if (!isTouching) {
+                break;
+            }
         }
     }
-
-    criarBG();
-    criarCobrinha();
-    drawFood();
-
-    deixe snakeX = snake[0].x;
-    deixe snakeY = snake[0].y;
-
-    if (direção == "direita") snakeX + = caixa;
-    if (direção == "esquerda") snakeX - = caixa;
-    if (direção == "para cima") snakeY - = caixa;
-    if (direção == "para baixo") snakeY + = caixa;
-
-    if (snakeX! = comida.x || snakeY! = comida.y) {
-        cobra.pop(); // pop tira ou último elemento da lista
-    } else {
-        comida.x = matemática.chão(matemática.aleatório() * 15 + 1) * caixa;
-        comida.y = matemática.chão(matemática.aleatório() * 15 + 1) * caixa;
-    }
-
-    deixe newHead = {
-        x: snakeX,
-        y: snakeY
-    }
-
-    cobra.unshift(newHead); // método unshift adiciona como primeiro quadradinho da cobrinha
 }
 
-deixe jogo = setInterval(iniciarJogo, 100);
+const snake = new Snake(20,20,20);
+let apple = new Apple();
